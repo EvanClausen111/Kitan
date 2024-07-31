@@ -1,4 +1,4 @@
-# Dockerfile
+# Dockerfile.frontend
 FROM node:14-alpine as build
 
 # 设置工作目录
@@ -10,16 +10,16 @@ COPY package*.json ./
 # 安装依赖
 RUN npm install
 
-# 复制项目文件
+# 复制前端项目文件
 COPY . .
 
 # 设置环境变量
 ARG VITE_BACKEND_URL
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
-# 可选：如果需要，设置 CLOUDFLARE_SITE_KEY
-# ARG VITE_CLOUDFLARE_SITE_KEY
-# ENV VITE_CLOUDFLARE_SITE_KEY=$VITE_CLOUDFLARE_SITE_KEY
+# 设置 CLOUDFLARE_SITE_KEY
+ARG VITE_CLOUDFLARE_SITE_KEY
+ENV VITE_CLOUDFLARE_SITE_KEY=$VITE_CLOUDFLARE_SITE_KEY
 
 # 构建项目
 RUN npm run build
@@ -41,7 +41,6 @@ EXPOSE 80 443 10223
 CMD ["nginx", "-g", "daemon off;"]
 
 # 修改nginx.conf后，构建镜像
-# docker build --build-arg VITE_BACKEND_URL=https://api.example.com -t kitan-frontend .
-
+# docker build -f Dockerfile.frontend --build-arg VITE_BACKEND_URL=https://api.example.com -t kitan-frontend .
 # Run
-# docker run -d -p 80:80 -p 443:443 -p 10223 -v /path/to/ssl/certs:/etc/nginx/ssl kitan-frontend
+# docker run -d -p 80:80 -p 443:443 -p 10223:10223 -v /path/to/ssl/certs:/etc/nginx/ssl --name kitan-frontend-container kitan-frontend
